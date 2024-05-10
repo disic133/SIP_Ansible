@@ -1,0 +1,55 @@
+- name: Install and configure httpd
+  hosts: localhost
+  become: true
+  tasks:
+    #    - name: Install httpd and mod_sll if not present
+    # ansible.builtin.yum:
+    #   name: {{ item }}
+    #   state: present
+    # loop:
+    # - httpd
+    # - mod_ssl
+
+    - name: Modify ssl.conf
+      ansible.builtin.template:
+        src: /jinja/ssl.j2
+        dest: /etc/httpd/conf.d/ssl.conf
+      become: yes
+
+    - name: Add index.html
+      ansible.builtin.template:
+        src: /jinja/index.j2
+        dest: /var/www/html/index.html
+      become: yes
+
+    - name: Modify httpd.conf
+      ansible.builtin.template:
+        src: /jinja/httpd_co.j2
+        dest: /etc/httpd/conf/httpd.conf
+      become: yes
+
+    - name: Allow through Firewall
+      ansible.builtin.firewalld:
+        service: "{{ item }}"
+        permanent: true
+        state: enabled
+      loop:
+        - http
+        - https
+
+    - name: Modify /etc/hosts
+      ansible.builtin.lineinfile:
+        line: "{{ item }}"
+        state: present
+        path: /etc/hosts
+      loop:
+        - "192.168.1.10 disic.com"
+        - "192.168.2.10 disic2.com"
+
+    - name: Restart services
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: reloaded
+      loop:
+        - httpd
+        - firewalld

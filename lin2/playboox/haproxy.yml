@@ -1,0 +1,22 @@
+---
+- name: SIP haproxy
+  hosts: localhost
+  become: true
+  tasks:
+    #    - name: Install neccessarry packages
+    # ansible.builtin.yum:
+    #   name: "{{ item }}"
+    #   state: present
+    #
+    # loop:
+    #   - haproxy
+    #   - httpd
+
+    - name: Configure firewalld
+      ansible.builtin.firewalld:
+        service: "{{ item }}"
+        state: enabled
+        permanent: true
+      loop:
+        - http
+        - https

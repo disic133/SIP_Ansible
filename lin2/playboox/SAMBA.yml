@@ -1,0 +1,37 @@
+---
+- name: SIP SAMBA
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Install samba if not present
+      ansible.builtin.yum:
+        name: samba
+        state: present
+
+    - name: Create samba share dir
+      ansible.builtin.file:
+        path: /samba_lin2
+        state: directory
+        mode: '0777'
+
+    - name: Modify smb.conf
+      ansible.builtin.template:
+        src: /jinja/samba.j2
+        dest: /etc/samba/smb.conf
+      become: yes
+
+    - name: Allow samba through Firewall
+      ansible.builtin.firewalld:
+        service: samba
+        permanent: true
+        state: enabled
+
+    - name: Reload firewall
+      ansible.builtin.service:
+        name: firewalld
+        state: reloaded
+
+    - name: Reload samba service
+      ansible.builtin.service:
+        name: smb
+        state: reloaded

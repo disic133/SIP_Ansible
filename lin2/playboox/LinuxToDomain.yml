@@ -1,0 +1,17 @@
+---
+- name: LinuxToDomain
+  hosts: localhost
+  become: true
+  tasks:
+    - name: SET IP of ens161
+      community.general.nmcli:
+        ifname: ens161
+        conn_name: ens161
+        type: ethernet
+        ip4: 192.168.2.10/24
+        gw4: 192.168.2.1
+        dns4: 192.168.2.1
+        state: present
+
+    - name: Add Linux host to Domain
+      ansible.builtin.script: /sxripts/LinuxToDomain.sh

@@ -1,0 +1,25 @@
+---
+- name: SIP NTP
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Install chrony if not present
+      ansible.builtin.yum:
+        name: chrony
+        state: present
+
+
+    - name: Configure chrony
+      ansible.builtin.lineinfile:
+        path: /etc/chrony.conf
+        line: "{{ item }}"
+        state: present
+      loop:
+        - "allow 192.168.2.0/24"
+        - "server 1.hr.pool.ntp.org iburst"
+
+    - name: Allow NTP service through Firewall
+      ansible.builtin.firewalld:
+        service: ntp
+        permanent: true
+        state: reloaded
