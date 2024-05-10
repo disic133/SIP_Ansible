@@ -1,0 +1,8 @@
+>
+  <head>
+    <title>Welcome to your website!</title>
+  </head>
+  <body>
+    <h1>WebServer "lin2.disic.local" is serving this site.</h1>
+  </body>
+</html>
