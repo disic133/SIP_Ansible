@@ -1,0 +1,18 @@
+---
+- name: sip domena linux1
+  hosts: localhost
+  become: true
+  tasks:
+    - name: SET IP of ens161
+      community.general.nmcli:
+        conn_name: ens161
+        ifname: ens161
+        type: ethernet
+        ip4: 192.168.1.10/24
+        gw4: 192.168.1.1
+        dns4: 192.168.1.1
+        state: present
+
+    - name: Add Linux machine to AD Domain
+      ansible.builtin.script: /sxripts/LinuxToDomain.sh
+      become: true

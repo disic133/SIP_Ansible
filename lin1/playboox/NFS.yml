@@ -1,0 +1,52 @@
+---
+- name: SIP NFS
+  hosts: localhost
+  become: true
+  vars:
+    share: "/nfs/share_Lin1"
+    options: "192.168.0.0/16(rw,sync,no_root_squash)"
+    permission: '0777'
+  tasks:
+
+    - name: Install NFS if not present
+      ansible.builtin.yum:
+        name:
+          - nfs-utils
+          - nfs4-acl-tools
+        state: present
+
+    - name: Create shared directory if not present
+      ansible.builtin.file:
+        path: "{{ share }}"
+        state: directory
+        mode: "{{ permission }}"
+        owner: root
+        group: root
+
+    - name: Modify /etc/exports
+      ansible.builtin.lineinfile:
+        path: /etc/exports
+        state: present
+        line: '{{ share }} {{ options }}'
+      notify: restart NFS server
+
+    - name: Export Share
+      ansible.builtin.command: "exportfs -rav"
+
+    - name: Enable firewall
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        state: enabled
+        permanent: true
+        immediate: true
+      with_items:
+        - nfs
+        - rpc-bind
+        - mountd
+
+  handlers:
+    - name: restart NFS server
+      ansible.builtin.service:
+        name: nfs-server
+        state: restarted
+        enabled: true

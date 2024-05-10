@@ -1,0 +1,26 @@
+---
+- name: SIP Install packages
+  hosts: localhost
+  become: true
+  tasks:
+
+    - name: Install packages
+      ansible.builtin.yum:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - haproxy
+        - httpd
+        - targetcli
+        - nfs-utils
+        - nfs4-acl-tools
+        - chrony
+        - samba
+        - httpd
+        - mod_ssl
+        - realmd
+        - sssd
+        - oddjob
+        - oddjob-mkhomedir
+        - adcli
+        - samba-common-tools

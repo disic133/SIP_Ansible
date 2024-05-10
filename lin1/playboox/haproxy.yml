@@ -1,0 +1,32 @@
+---
+- name: SIP HAProxy
+  hosts: localhost
+  become: true
+  tasks:
+    #    - name: Install HAProxy and HTTPd
+    # ansible.builtin.yum:
+    #   name: "{{ item }}"
+    #   state: present
+    # loop:
+    #   - haproxy
+    #   - httpd
+
+    - name: Modify haproxy.cfg
+      ansible.builtin.template:
+        src: /jinja/haproxy.j2
+        dest: /etc/haproxy/haproxy.cfg
+      become: yes
+
+    - name: Configure firewalld
+      ansible.builtin.firewalld:
+        service: "{{ item }}"
+        state: enabled
+        permanent: true
+      loop:
+        - http
+        - https
+
+    - name: Reload firewalld
+      ansible.builtin.service:
+        name: firewalld
+        state: reloaded

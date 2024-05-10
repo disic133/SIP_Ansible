@@ -1,0 +1,24 @@
+---
+- name: SIP iSCSi
+  hosts: localhost
+  become: true
+  tasks:
+    # - name: Install targetcli if not present
+    # ansible.builtin.yum:
+    #   name: targetcli
+    #   state: present
+
+    - name: iscsi conf
+      ansible.builtin.script: /sxripts/iSCSi.sh
+      become: true
+
+    - name: ALLOW through Firewall
+      ansible.builtin.firewalld:
+        port: 3260/tcp
+        permanent: true
+        state: enabled
+
+    - name: restart Firewalld
+      ansible.builtin.service:
+        name: firewalld
+        state: reloaded

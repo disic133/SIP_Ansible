@@ -1,0 +1,55 @@
+- name: Instalacija i konfiguracija httpd servera
+  hosts: localhost
+  become: true
+  tasks:
+    #    - name: instalacija httpd i mod_sll
+    # ansible.builtin.yum:
+    #   name: {{ item }}
+    #   state: present
+    # loop:
+    # - httpd
+    # - mod_ssl
+
+    - name: konfiguracija /etc/httpd/conf.d/ssl.conf
+      ansible.builtin.template:
+        src: /jinja/ssl.j2
+        dest: /etc/httpd/conf.d/ssl.conf
+      become: yes
+
+    - name: index.html
+      ansible.builtin.template:
+        src: /jinja/index.j2
+        dest: /var/www/html/index.html
+      become: yes
+
+    - name: konfiguracija /etc/httpd/conf.d/ssl.conf
+      ansible.builtin.template:
+        src: /jinja/httpd_co.j2
+        dest: /etc/httpd/conf/httpd.conf
+      become: yes
+
+    - name: add services to firewalld
+      ansible.builtin.firewalld:
+        service: "{{ item }}"
+        permanent: true
+        state: enabled
+      loop:
+        - http
+        - https
+
+    - name: Modify /etc/hosts
+      ansible.builtin.lineinfile:
+        name: "{{ item }}"
+        dest: /etc/hosts
+        state: present
+      loop:
+        - "192.168.1.10 disic.com"
+        - "192.168.2.10 disic2.com"
+
+    - name: restart service
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: reloaded
+      loop:
+        - httpd
+        - firewalld
